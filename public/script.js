@@ -19,17 +19,50 @@ document.addEventListener('DOMContentLoaded', () => {
     let capturedLat = null;
     let capturedLng = null;
 
-    // GPS capture
+    // GPS elements
     const captureGpsBtn = document.getElementById('capture-gps-btn');
     const gpsDisplay = document.getElementById('gps-display');
-    const gpsManual = document.getElementById('gps-manual');
+    const gpsStatus = document.getElementById('gps-status');
+    const gpsManualToggle = document.getElementById('gps-manual-toggle');
+    const gpsAutoSection = document.getElementById('gps-auto-section');
+    const gpsManualSection = document.getElementById('gps-manual-section');
+    const manualLatEl = document.getElementById('manualLat');
+    const manualLngEl = document.getElementById('manualLng');
+    const gpsManualDisplay = document.getElementById('gps-manual-display');
+    const gpsErrorMessage = document.getElementById('gps-error-message');
 
+    // Helper: format coordinates in readable notation
+    function formatCoordinates(lat, lng) {
+        if (lat == null || lng == null) return '';
+        const latDirection = lat >= 0 ? 'N' : 'S';
+        const lngDirection = lng >= 0 ? 'E' : 'W';
+        return `${Math.abs(lat).toFixed(5)}° ${latDirection}, ${Math.abs(lng).toFixed(5)}° ${lngDirection}`;
+    }
+
+    // Toggle logic
+    gpsManualToggle.addEventListener('change', () => {
+        if (gpsManualToggle.checked) {
+            gpsAutoSection.classList.add('hidden');
+            gpsManualSection.classList.remove('hidden');
+            validateLocationInput();
+        } else {
+            gpsAutoSection.classList.remove('hidden');
+            gpsManualSection.classList.add('hidden');
+            // If GPS location not captured, enable submit but it's optional unless requested
+            submitBtn.disabled = false;
+            gpsErrorMessage.classList.add('hidden');
+        }
+    });
+
+    // Capture GPS coordinates automatically
     captureGpsBtn.addEventListener('click', () => {
         captureGpsBtn.textContent = '📍 Locating...';
         captureGpsBtn.disabled = true;
 
         if (!navigator.geolocation) {
-            showManualFallback();
+            gpsStatus.textContent = 'Geolocation not supported by browser.';
+            captureGpsBtn.textContent = '📍 Capture Location';
+            captureGpsBtn.disabled = false;
             return;
         }
 
@@ -37,24 +70,71 @@ document.addEventListener('DOMContentLoaded', () => {
             (position) => {
                 capturedLat = parseFloat(position.coords.latitude.toFixed(5));
                 capturedLng = parseFloat(position.coords.longitude.toFixed(5));
-                gpsDisplay.textContent = `📍 ${capturedLat}°N, ${capturedLng}°E`;
+                
+                // Show green badge
+                gpsDisplay.innerHTML = `<span class="badge high" style="background-color: var(--clr-success); margin-bottom: 0.3rem; display: inline-block;">📍 Location Captured</span><br>${formatCoordinates(capturedLat, capturedLng)}`;
                 gpsDisplay.classList.remove('hidden');
                 gpsDisplay.classList.add('gps-captured');
-                gpsManual.classList.add('hidden');
+                gpsStatus.textContent = 'Location captured';
                 captureGpsBtn.textContent = '✅ Location Captured';
                 captureGpsBtn.disabled = false;
             },
-            () => showManualFallback(),
+            (error) => {
+                gpsStatus.textContent = 'Location capture failed. Switch to manual entry.';
+                captureGpsBtn.textContent = '📍 Capture Location';
+                captureGpsBtn.disabled = false;
+            },
             { timeout: 8000 }
         );
     });
 
-    function showManualFallback() {
-        captureGpsBtn.textContent = '📍 Capture Location';
-        captureGpsBtn.disabled = false;
-        gpsManual.classList.remove('hidden');
-        gpsDisplay.classList.add('hidden');
+    // Validate manual coordinate inputs
+    function validateLocationInput() {
+        if (!gpsManualToggle.checked) {
+            submitBtn.disabled = false;
+            gpsErrorMessage.classList.add('hidden');
+            return;
+        }
+
+        const latVal = manualLatEl.value.trim();
+        const lngVal = manualLngEl.value.trim();
+
+        if (latVal === '' || lngVal === '') {
+            gpsErrorMessage.textContent = 'Latitude and Longitude values are required.';
+            gpsErrorMessage.classList.remove('hidden');
+            gpsManualDisplay.classList.add('hidden');
+            submitBtn.disabled = true;
+            return;
+        }
+
+        const lat = parseFloat(latVal);
+        const lng = parseFloat(lngVal);
+
+        if (isNaN(lat) || lat < -90 || lat > 90) {
+            gpsErrorMessage.textContent = 'Latitude must be a valid number between -90 and 90.';
+            gpsErrorMessage.classList.remove('hidden');
+            gpsManualDisplay.classList.add('hidden');
+            submitBtn.disabled = true;
+            return;
+        }
+
+        if (isNaN(lng) || lng < -180 || lng > 180) {
+            gpsErrorMessage.textContent = 'Longitude must be a valid number between -180 and 180.';
+            gpsErrorMessage.classList.remove('hidden');
+            gpsManualDisplay.classList.add('hidden');
+            submitBtn.disabled = true;
+            return;
+        }
+
+        // Show yellow badge on success
+        gpsErrorMessage.classList.add('hidden');
+        gpsManualDisplay.innerHTML = `<span class="badge medium" style="background-color: var(--clr-gold); margin-bottom: 0.3rem; display: inline-block; color: white;">⚠️ Manual Location (Lower Trust)</span><br>${formatCoordinates(lat, lng)}`;
+        gpsManualDisplay.classList.remove('hidden');
+        submitBtn.disabled = false;
     }
+
+    manualLatEl.addEventListener('input', validateLocationInput);
+    manualLngEl.addEventListener('input', validateLocationInput);
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -76,10 +156,9 @@ document.addEventListener('DOMContentLoaded', () => {
         btnText.textContent = 'Verifying...';
         loader.classList.remove('hidden');
 
-        const manualLat = document.getElementById('manualLat').value;
-        const manualLng = document.getElementById('manualLng').value;
-        const gpsLat = capturedLat !== null ? capturedLat : (manualLat ? parseFloat(manualLat) : null);
-        const gpsLng = capturedLng !== null ? capturedLng : (manualLng ? parseFloat(manualLng) : null);
+        const manualEntry = gpsManualToggle.checked;
+        const gpsLat = manualEntry ? (manualLatEl.value ? parseFloat(manualLatEl.value) : null) : capturedLat;
+        const gpsLng = manualEntry ? (manualLngEl.value ? parseFloat(manualLngEl.value) : null) : capturedLng;
 
         const formData = {
             farmerId: document.getElementById('farmerId').value.trim(),
@@ -88,11 +167,102 @@ document.addEventListener('DOMContentLoaded', () => {
             harvestMonth: document.getElementById('harvestMonth').value,
             method: document.getElementById('method').value,
             gpsLat,
-            gpsLng
+            gpsLng,
+            manualEntry
         };
 
+        const photoInput = document.getElementById('photo');
+        const photoPreviewContainer = document.getElementById('photo-preview-container');
+        const photoPreviewImg = document.getElementById('photo-preview-img');
+        const visionBadge = document.getElementById('vision-badge');
+        
+        if (visionBadge) {
+            visionBadge.className = 'vision-badge hidden';
+            visionBadge.textContent = '';
+        }
+
+        let imageResult = null;
+        let base64Image = null;
+
         try {
-            // Step 1: Verification
+            // STEP 1: Image Analysis Integration (if image uploaded)
+            if (photoInput.files && photoInput.files[0]) {
+                btnText.textContent = 'Analyzing image...';
+                
+                base64Image = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (event) => resolve(event.target.result);
+                    reader.onerror = (err) => reject(err);
+                    reader.readAsDataURL(photoInput.files[0]);
+                });
+
+                photoPreviewImg.src = base64Image;
+                photoPreviewContainer.classList.remove('hidden');
+
+                const visionResponse = await fetch('/api/vision', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        image: base64Image,
+                        fileName: photoInput.files[0].name,
+                        crop: formData.crop,
+                        region: formData.region,
+                        harvestMonth: formData.harvestMonth,
+                        method: formData.method
+                    })
+                });
+
+                if (!visionResponse.ok) {
+                    throw new Error("Vision classification failed");
+                }
+
+                const visionData = await visionResponse.json();
+                imageResult = visionData.image_detected || 'UNCLEAR';
+
+                const claimedCrop = formData.crop.toLowerCase();
+                const isMismatch = (claimedCrop.includes('cardamom') && imageResult === 'PEPPER') ||
+                                   (claimedCrop.includes('pepper') && imageResult === 'CARDAMOM');
+
+                if (isMismatch) {
+                    // BLOCK submission immediately
+                    resultSection.classList.remove('hidden');
+                    warningBox.querySelector('h3').textContent = "Mismatch Detected";
+                    warningFlags.textContent = `❌ Mismatch Detected: ${imageResult} image uploaded for ${formData.crop}`;
+                    warningBox.classList.remove('hidden');
+                    
+                    if (visionBadge) {
+                        const titleCasedResult = imageResult.charAt(0).toUpperCase() + imageResult.slice(1).toLowerCase();
+                        const titleCasedClaimed = claimedCrop.includes('cardamom') ? 'Cardamom' : 'Pepper';
+                        visionBadge.textContent = `❌ Mismatch Detected: ${titleCasedResult} image uploaded for ${titleCasedClaimed}`;
+                        visionBadge.className = 'vision-badge warning';
+                    }
+                    resetBtn();
+                    return;
+                }
+
+                // UI Feedback for Match or Unclear
+                if (imageResult === 'UNCLEAR') {
+                    if (visionBadge) {
+                        visionBadge.textContent = '⚠️ Image unclear — manual review required';
+                        visionBadge.className = 'vision-badge warning';
+                    }
+                } else {
+                    if (visionBadge) {
+                        const titleCasedResult = imageResult.charAt(0).toUpperCase() + imageResult.slice(1).toLowerCase();
+                        visionBadge.textContent = `✅ Image Verified: ${titleCasedResult}`;
+                        visionBadge.className = 'vision-badge success';
+                    }
+                }
+            } else {
+                photoPreviewContainer.classList.add('hidden');
+                photoPreviewImg.src = '';
+            }
+
+            // Include vision result in verification request payload
+            formData.imageResult = imageResult;
+            btnText.textContent = 'Verifying...';
+
+            // Step 2: Verification
             const verifyResponse = await fetch('/api/verify', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -135,6 +305,11 @@ document.addEventListener('DOMContentLoaded', () => {
               checks.push({ field: 'gps', label: gpsLabel, passed: !flags.includes('gps') });
             }
 
+            if (imageResult) {
+              const visionLabel = imageResult === 'UNCLEAR' ? 'Image analysis: Unclear' : `Image analysis: Consistent (${imageResult})`;
+              checks.push({ field: 'vision', label: visionLabel, passed: imageResult !== 'UNCLEAR' });
+            }
+
             checks.forEach((check, i) => {
               setTimeout(() => {
                 const li = document.createElement('li');
@@ -145,18 +320,20 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             const finalDelay = checks.length * 400;
+            const isRejected = verifyData.final_decision === 'REJECT' || verifyData.match_status === 'inconsistent';
+            const isReview = verifyData.final_decision === 'REVIEW';
 
-            if (verifyData.match_status === 'inconsistent') {
+            if (isRejected || isReview) {
               setTimeout(() => {
                 const li = document.createElement('li');
                 li.className = 'checklist-item check-fail';
-                li.textContent = '⚠️ Verification incomplete — review required';
+                li.textContent = isRejected ? '❌ Verification failed — reject certificate' : '⚠️ Verification incomplete — review required';
                 checklistItems.appendChild(li);
               }, finalDelay);
 
               setTimeout(() => {
-                warningBox.querySelector('h3').textContent = 'Submission Needs Review';
-                warningFlags.textContent = flags.length ? `Flagged fields: ${flags.join(', ')}` : 'Unknown issues';
+                warningBox.querySelector('h3').textContent = isRejected ? 'Submission Rejected' : 'Submission Needs Review';
+                warningFlags.textContent = verifyData.reason || (flags.length ? `Flagged: ${flags.join(', ')}` : 'Inconsistent verification data');
                 warningBox.classList.remove('hidden');
 
                 // --- Mismatch Metadata Box ---
@@ -171,6 +348,18 @@ document.addEventListener('DOMContentLoaded', () => {
                   gps: {
                     submitted: submitted.gpsLat != null ? `${submitted.gpsLat}°N, ${submitted.gpsLng}°E` : 'not provided',
                     expected: `within ${submitted.region || 'claimed region'} boundary`
+                  },
+                  manual_entry: {
+                    submitted: 'Manual Entry Used',
+                    expected: 'Automatic GPS preferred'
+                  },
+                  vision_unclear: {
+                    submitted: 'Unclear',
+                    expected: `Consistent with ${formData.crop}`
+                  },
+                  image_mismatch: {
+                    submitted: imageResult || 'Mismatched',
+                    expected: formData.crop
                   }
                 };
 
@@ -188,20 +377,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 if (hasMismatches) mismatchBox.classList.remove('hidden');
-                resetBtn();
+                if (isRejected) {
+                  resetBtn();
+                }
               }, finalDelay + 400);
-              return;
+
+              if (isRejected) {
+                return;
+              }
             }
 
-            // Consistent — show final step then proceed to certificate
+            // Consistent or Review — show progress then proceed to certificate
             setTimeout(() => {
               const li = document.createElement('li');
               li.className = 'checklist-item check-pass';
-              li.textContent = '✅ Provenance Verified. Issuing certificate...';
+              li.textContent = isReview ? '⚠️ Proceeding with manual review flag...' : '✅ Provenance Verified. Issuing certificate...';
               checklistItems.appendChild(li);
             }, finalDelay);
 
-            // Step 2: Consistent - Generate Certificate (delayed to let checklist finish)
+            // Step 3: Consistent/Review - Generate Certificate (delayed to let checklist finish)
             btnText.textContent = 'Generating Certificate...';
             await new Promise(r => setTimeout(r, finalDelay + 800));
             
@@ -271,62 +465,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 correctLevel : QRCode.CorrectLevel.H
             });
             
-            // Photo Preview and Vision Call
-            const photoInput = document.getElementById('photo');
-            const photoPreviewContainer = document.getElementById('photo-preview-container');
-            const photoPreviewImg = document.getElementById('photo-preview-img');
-            const visionBadge = document.getElementById('vision-badge');
-            
-            if (visionBadge) {
-                visionBadge.className = 'vision-badge hidden';
-                visionBadge.textContent = '';
-            }
-
-            if (photoInput.files && photoInput.files[0]) {
-                const reader = new FileReader();
-                reader.onload = async function(e) {
-                    const base64Image = e.target.result;
-                    photoPreviewImg.src = base64Image;
-                    photoPreviewContainer.classList.remove('hidden');
-
-                    if (visionBadge) {
-                        try {
-                            visionBadge.textContent = 'Analyzing image...';
-                            visionBadge.className = 'vision-badge';
-                            
-                            const visionResponse = await fetch('/api/vision', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ image: base64Image })
-                            });
-                            const visionData = await visionResponse.json();
-                            
-                            const claimedCrop = formData.crop.toUpperCase();
-                            let isMatch = false;
-                            if (claimedCrop.includes('CARDAMOM') && visionData.result === 'CARDAMOM') isMatch = true;
-                            if (claimedCrop.includes('PEPPER') && visionData.result === 'PEPPER') isMatch = true;
-
-                            if (visionData.result === 'UNCLEAR' || visionData.result === 'ERROR') {
-                                visionBadge.classList.add('hidden'); 
-                            } else if (isMatch) {
-                                visionBadge.textContent = '✅ Image consistent with claimed crop type';
-                                visionBadge.className = 'vision-badge success';
-                            } else {
-                                visionBadge.textContent = '⚠️ Uploaded image does not appear to match claimed crop type — flagged for review';
-                                visionBadge.className = 'vision-badge warning';
-                            }
-                        } catch (err) {
-                            console.error('Vision API error:', err);
-                            visionBadge.classList.add('hidden');
-                        }
-                    }
-                }
-                reader.readAsDataURL(photoInput.files[0]);
-            } else {
-                photoPreviewContainer.classList.add('hidden');
-                photoPreviewImg.src = '';
-            }
-
             // Show certificate
             certificateCard.classList.remove('hidden');
 

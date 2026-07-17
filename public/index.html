@@ -73,16 +73,28 @@
 
                 <div class="form-group gps-group">
                     <label>Farm GPS Location</label>
-                    <button type="button" id="capture-gps-btn" class="btn-secondary">
-                        📍 Capture Location
-                    </button>
-                    <div id="gps-display" class="gps-display hidden"></div>
-                    <div id="gps-manual" class="gps-manual hidden">
-                        <p class="gps-manual-hint">Location unavailable — enter coordinates manually:</p>
-                        <div class="gps-manual-inputs">
-                            <input type="number" id="manualLat" placeholder="Latitude (e.g. 9.85)" step="0.0001">
-                            <input type="number" id="manualLng" placeholder="Longitude (e.g. 77.05)" step="0.0001">
+                    
+                    <div class="gps-toggle-container" style="margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="checkbox" id="gps-manual-toggle">
+                        <label for="gps-manual-toggle" style="display:inline; font-size: 0.85rem; font-weight: 500; text-transform: none; letter-spacing: 0; margin-bottom: 0;">Enter location manually</label>
+                    </div>
+
+                    <div id="gps-auto-section">
+                        <button type="button" id="capture-gps-btn" class="btn-secondary">
+                            📍 Capture Location
+                        </button>
+                        <div id="gps-status" style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--clr-text-muted);">Location not captured</div>
+                        <div id="gps-display" class="gps-display hidden"></div>
+                    </div>
+
+                    <div id="gps-manual-section" class="hidden">
+                        <p class="gps-manual-hint" style="margin-bottom: 0.5rem; font-size: 0.82rem; color: var(--clr-text-muted);">Enter coordinates manually if GPS is unavailable</p>
+                        <div class="gps-manual-inputs" style="margin-bottom: 0.5rem;">
+                            <input type="number" id="manualLat" placeholder="Latitude (-90 to 90)" step="0.00001">
+                            <input type="number" id="manualLng" placeholder="Longitude (-180 to 180)" step="0.00001">
                         </div>
+                        <div id="gps-manual-display" class="gps-display hidden" style="background-color: #FFF5F4; border-color: #D4917F; color: var(--clr-error); display: inline-block;"></div>
+                        <div id="gps-error-message" style="color: var(--clr-error); font-size: 0.82rem; margin-top: 0.4rem;" class="hidden"></div>
                     </div>
                 </div>
 

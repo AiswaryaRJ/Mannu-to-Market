@@ -33,6 +33,12 @@ app.post('/api/verify', async (req, res) => {
     const dateObj = new Date(date);
     const harvestMonthName = monthNames[dateObj.getMonth()];
 
+    const methodMap = {
+      "Shade-grown/Traditional": "shade-grown",
+      "Intensive/Modern": "intensive"
+    };
+    const normalizedMethod = methodMap[method] || method;
+
     const promptText = `You are a supply-chain verification assistant. Compare the farmer
 submission against this reference data ONLY. Do not use outside
 knowledge.
@@ -43,10 +49,11 @@ REFERENCE DATA:
   'idukki_cardamom': {region: 'Idukki', harvest_months: ['August','September','October','November'], method: 'shade-grown'}
 }
 
-SUBMISSION: crop=${crop}, region=${region}, harvest_month=${harvestMonthName}, method=${method}
+SUBMISSION: crop=${crop}, region=${region}, harvest_month=${harvestMonthName}, method=${normalizedMethod}
 
 Check if harvest_month is in the reference crop's harvest_months list,
-if region matches, and if method matches. Output ONLY this JSON, no
+if region matches (case-insensitive, normalize both to lowercase before checking), 
+and if method matches. Output ONLY this JSON, no
 reasoning, no markdown:
 {"match_status": "consistent" or "inconsistent", "flags": [], "confidence_note": ""}`;
 

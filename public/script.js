@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loader.classList.remove('hidden');
 
         const formData = {
+            farmerId: document.getElementById('farmerId').value.trim(),
             crop: document.getElementById('crop').value,
             region: document.getElementById('region').value,
             date: document.getElementById('date').value,
@@ -46,7 +47,13 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (!verifyResponse.ok) {
-                throw new Error("Verification request failed");
+                const errorData = await verifyResponse.json().catch(() => ({}));
+                resultSection.classList.remove('hidden');
+                warningBox.querySelector('h3').textContent = "Verification Failed";
+                document.getElementById('warning-flags').textContent = errorData.error || "Verification request failed";
+                warningBox.classList.remove('hidden');
+                resetBtn();
+                return;
             }
 
             const verifyData = await verifyResponse.json();
@@ -55,6 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (verifyData.match_status === 'inconsistent') {
                 // Show warning
+                warningBox.querySelector('h3').textContent = "Submission Needs Review";
                 warningFlags.textContent = verifyData.flags ? verifyData.flags.join(', ') : 'Unknown issues';
                 warningBox.classList.remove('hidden');
                 resetBtn();
@@ -96,6 +104,11 @@ document.addEventListener('DOMContentLoaded', () => {
             certTextEn.textContent = englishText;
             certTextMl.textContent = malayalamText;
             
+            const farmerIdDisplay = document.getElementById('farmer-id-display');
+            if (farmerIdDisplay) {
+                farmerIdDisplay.textContent = `Farmer ID: ${certData.farmerId} (${certData.farmerName}) — Verified at Onboarding`;
+            }
+            
             // Eco Badge
             if (formData.method === 'Shade-grown/Traditional') {
                 ecoBadge.textContent = 'High Sustainability';
@@ -119,16 +132,55 @@ document.addEventListener('DOMContentLoaded', () => {
                 correctLevel : QRCode.CorrectLevel.H
             });
             
-            // Photo Preview
+            // Photo Preview and Vision Call
             const photoInput = document.getElementById('photo');
             const photoPreviewContainer = document.getElementById('photo-preview-container');
             const photoPreviewImg = document.getElementById('photo-preview-img');
+            const visionBadge = document.getElementById('vision-badge');
             
+            if (visionBadge) {
+                visionBadge.className = 'vision-badge hidden';
+                visionBadge.textContent = '';
+            }
+
             if (photoInput.files && photoInput.files[0]) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
-                    photoPreviewImg.src = e.target.result;
+                reader.onload = async function(e) {
+                    const base64Image = e.target.result;
+                    photoPreviewImg.src = base64Image;
                     photoPreviewContainer.classList.remove('hidden');
+
+                    if (visionBadge) {
+                        try {
+                            visionBadge.textContent = 'Analyzing image...';
+                            visionBadge.className = 'vision-badge';
+                            
+                            const visionResponse = await fetch('/api/vision', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ image: base64Image })
+                            });
+                            const visionData = await visionResponse.json();
+                            
+                            const claimedCrop = formData.crop.toUpperCase();
+                            let isMatch = false;
+                            if (claimedCrop.includes('CARDAMOM') && visionData.result === 'CARDAMOM') isMatch = true;
+                            if (claimedCrop.includes('PEPPER') && visionData.result === 'PEPPER') isMatch = true;
+
+                            if (visionData.result === 'UNCLEAR' || visionData.result === 'ERROR') {
+                                visionBadge.classList.add('hidden'); 
+                            } else if (isMatch) {
+                                visionBadge.textContent = '✅ Image consistent with claimed crop type';
+                                visionBadge.className = 'vision-badge success';
+                            } else {
+                                visionBadge.textContent = '⚠️ Uploaded image does not appear to match claimed crop type — flagged for review';
+                                visionBadge.className = 'vision-badge warning';
+                            }
+                        } catch (err) {
+                            console.error('Vision API error:', err);
+                            visionBadge.classList.add('hidden');
+                        }
+                    }
                 }
                 reader.readAsDataURL(photoInput.files[0]);
             } else {

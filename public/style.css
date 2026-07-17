@@ -287,6 +287,27 @@ main {
     border-radius: 8px;
     border: 1px solid var(--border-color);
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    margin-bottom: 0.5rem;
+}
+
+.vision-badge {
+    font-size: 0.75rem;
+    padding: 0.4rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 600;
+    margin-top: 0.25rem;
+}
+
+.vision-badge.success {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #c8e6c9;
+}
+
+.vision-badge.warning {
+    background-color: #fff3e0;
+    color: #e65100;
+    border: 1px solid #ffcc80;
 }
 
 .price-estimator {

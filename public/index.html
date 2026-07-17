@@ -20,6 +20,11 @@
             <h2>Generate Certificate</h2>
             <form id="provenance-form">
                 <div class="form-group">
+                    <label for="farmerId">Farmer ID (verified at onboarding)</label>
+                    <input type="text" id="farmerId" name="farmerId" placeholder="e.g. KL-IDK-0472" required>
+                </div>
+
+                <div class="form-group">
                     <label for="crop">Crop</label>
                     <select id="crop" name="crop" required>
                         <option value="" disabled selected>Select crop...</option>
@@ -73,9 +78,9 @@
                     <div id="eco-badge" class="badge"></div>
                 </div>
                 
-                <div class="farmer-verification">
+                <div class="farmer-verification" id="farmer-verification-box">
                     <span class="verification-icon">✔️</span>
-                    <span>Farmer ID: KL-IDK-0472 — Verified at Onboarding</span>
+                    <span id="farmer-id-display">Farmer ID: KL-IDK-0472 — Verified at Onboarding</span>
                 </div>
                 
                 <div class="certificate-content">
@@ -94,6 +99,7 @@
                         <div class="photo-preview hidden" id="photo-preview-container">
                             <h4>Harvest Photo</h4>
                             <img id="photo-preview-img" src="" alt="Harvest Thumbnail">
+                            <div id="vision-badge" class="vision-badge hidden"></div>
                         </div>
                         <div class="price-estimator">
                             <h4>Price Estimator</h4>

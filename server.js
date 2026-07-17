@@ -1,6 +1,10 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 const app = express();
 const port = 3000;
@@ -10,41 +14,25 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 async function callGemma(promptText) {
-  const response = await fetch("http://127.0.0.1:1234/v1/chat/completions", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: "google/gemma-4-e4b",
-      messages: [{ role: "user", content: promptText }],
-      temperature: 0.3,
-      max_tokens: 1500
-    })
-  });
-  const data = await response.json();
-  return { content: data.choices[0]?.message?.content || "", rawData: data };
+  const model = genAI.getGenerativeModel({ model: 'gemma-3-27b-it' });
+  const result = await model.generateContent(promptText);
+  const content = result.response.text();
+  return { content, rawData: result };
 }
 
 async function callGemmaVision(promptText, base64Image) {
-  const response = await fetch("http://127.0.0.1:1234/v1/chat/completions", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: "google/gemma-4-e4b", 
-      messages: [
-        { 
-          role: "user", 
-          content: [
-            { type: "text", text: promptText },
-            { type: "image_url", image_url: { url: base64Image } }
-          ]
-        }
-      ],
-      temperature: 0.3,
-      max_tokens: 50
-    })
-  });
-  const data = await response.json();
-  return { content: data.choices[0]?.message?.content || "", rawData: data };
+  // Strip the data URL prefix to get raw base64
+  const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, '');
+  const mimeMatch = base64Image.match(/^data:(image\/\w+);base64,/);
+  const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+  const result = await model.generateContent([
+    promptText,
+    { inlineData: { data: base64Data, mimeType } }
+  ]);
+  const content = result.response.text();
+  return { content, rawData: result };
 }
 
 const verifiedFarmers = {
@@ -54,9 +42,19 @@ const verifiedFarmers = {
   "KL-PEND-0000": { name: "Pending Farmer", verifiedRegion: "Wayanad", verifiedCrops: ["wayanad_pepper"], status: "pending" }
 };
 
+const referenceData = {
+  'wayanad_pepper': {region: 'Wayanad', harvest_months: ['December','January','February'], method: 'shade-grown'},
+  'idukki_cardamom': {region: 'Idukki', harvest_months: ['August','September','October','November'], method: 'shade-grown'}
+};
+
+const regionBoundaries = {
+  'idukki':  { minLat: 9.70,  maxLat: 10.15, minLng: 76.85, maxLng: 77.25 },
+  'wayanad': { minLat: 11.55, maxLat: 11.95, minLng: 75.95, maxLng: 76.35 }
+};
+
 app.post('/api/verify', async (req, res) => {
   try {
-    const { crop, region, date, method, farmerId } = req.body;
+    const { crop, region, harvestMonth, method, farmerId, gpsLat, gpsLng } = req.body;
 
     const farmer = verifiedFarmers[farmerId];
     if (!farmer) {
@@ -71,16 +69,25 @@ app.post('/api/verify', async (req, res) => {
       return res.status(400).json({ error: `This farmer is not verified to grow ${crop}. Flagged for officer review.` });
     }
 
-    const monthNames = ["January","February","March","April","May","June",
-      "July","August","September","October","November","December"];
-    const dateObj = new Date(date);
-    const harvestMonthName = monthNames[dateObj.getMonth()];
-
     const methodMap = {
       "Shade-grown/Traditional": "shade-grown",
       "Intensive/Modern": "intensive"
     };
     const normalizedMethod = methodMap[method] || method;
+    const expectedData = referenceData[cropKey];
+
+    // GPS boundary check (pure JS, not sent to Gemma)
+    let gpsFlag = null;
+    if (gpsLat != null && gpsLng != null) {
+      const bounds = regionBoundaries[region.toLowerCase()];
+      if (bounds) {
+        const inBounds = gpsLat >= bounds.minLat && gpsLat <= bounds.maxLat
+                      && gpsLng >= bounds.minLng && gpsLng <= bounds.maxLng;
+        if (!inBounds) {
+          gpsFlag = 'gps';
+        }
+      }
+    }
 
     const promptText = `You are a supply-chain verification assistant. Compare the farmer
 submission against this reference data ONLY. Do not use outside
@@ -92,7 +99,7 @@ REFERENCE DATA:
   'idukki_cardamom': {region: 'Idukki', harvest_months: ['August','September','October','November'], method: 'shade-grown'}
 }
 
-SUBMISSION: crop=${crop}, region=${region}, harvest_month=${harvestMonthName}, method=${normalizedMethod}
+SUBMISSION: crop=${crop}, region=${region}, harvest_month=${harvestMonth}, method=${normalizedMethod}
 
 Check if harvest_month is in the reference crop's harvest_months list,
 if region matches (case-insensitive, normalize both to lowercase before checking), 
@@ -125,6 +132,18 @@ reasoning, no markdown:
       console.error("Parse Error:", parseError);
       return res.status(500).json({ error: "Failed to parse verification response." });
     }
+    
+    // Attach expected data for frontend display
+    jsonResponse.expectedData = expectedData;
+    jsonResponse.submittedData = { region, harvestMonth, normalizedMethod, gpsLat, gpsLng };
+
+    // Merge GPS flag if present
+    if (gpsFlag && !jsonResponse.flags.includes(gpsFlag)) {
+      jsonResponse.flags.push(gpsFlag);
+      if (jsonResponse.match_status !== 'inconsistent') {
+        jsonResponse.match_status = 'inconsistent';
+      }
+    }
 
     res.json(jsonResponse);
 
@@ -136,27 +155,23 @@ reasoning, no markdown:
 
 app.post('/api/certificate', async (req, res) => {
   try {
-    const { crop, region, date, method, farmerId } = req.body;
+    const { crop, region, harvestMonth, method, farmerId } = req.body;
 
     let farmerName = "Verified Farmer";
     if (verifiedFarmers[farmerId]) {
       farmerName = verifiedFarmers[farmerId].name;
     }
 
-    const monthNames = ["January","February","March","April","May","June",
-      "July","August","September","October","November","December"];
-    const dateObj = new Date(date);
-    const harvestMonthName = monthNames[dateObj.getMonth()];
-
     const promptText = `Write a short 3-4 sentence provenance certificate in English, then
 translate it to Malayalam. Use only these verified facts: farmer=${farmerName}, crop=${crop},
-region=${region}, date=${harvestMonthName}, method=${method}. Do not invent details.
+region=${region}, harvested in ${harvestMonth}, method=${method}. Do not invent details.
 Format output as:
 ENGLISH: <text>
 MALAYALAM: <text>`;
 
+    const certificateId = `CERT-${Date.now()}`;
     const { content: response } = await callGemma(promptText);
-    res.json({ certificate: response, farmerName, farmerId });
+    res.json({ certificate: response, farmerName, farmerId, certificateId });
 
   } catch (error) {
     console.error("Certificate generation error:", error);

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mannu to Market | Spice Provenance</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -39,8 +39,22 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="date">Harvest Date</label>
-                    <input type="date" id="date" name="date" required>
+                    <label for="harvestMonth">Harvest Month</label>
+                    <select id="harvestMonth" name="harvestMonth" required>
+                        <option value="" disabled selected>Select month...</option>
+                        <option>January</option>
+                        <option>February</option>
+                        <option>March</option>
+                        <option>April</option>
+                        <option>May</option>
+                        <option>June</option>
+                        <option>July</option>
+                        <option>August</option>
+                        <option>September</option>
+                        <option>October</option>
+                        <option>November</option>
+                        <option>December</option>
+                    </select>
                 </div>
 
                 <div class="form-group">
@@ -57,6 +71,21 @@
                     <input type="file" id="photo" name="photo" accept="image/*" capture="environment">
                 </div>
 
+                <div class="form-group gps-group">
+                    <label>Farm GPS Location</label>
+                    <button type="button" id="capture-gps-btn" class="btn-secondary">
+                        📍 Capture Location
+                    </button>
+                    <div id="gps-display" class="gps-display hidden"></div>
+                    <div id="gps-manual" class="gps-manual hidden">
+                        <p class="gps-manual-hint">Location unavailable — enter coordinates manually:</p>
+                        <div class="gps-manual-inputs">
+                            <input type="number" id="manualLat" placeholder="Latitude (e.g. 9.85)" step="0.0001">
+                            <input type="number" id="manualLng" placeholder="Longitude (e.g. 77.05)" step="0.0001">
+                        </div>
+                    </div>
+                </div>
+
                 <button type="submit" id="submit-btn" class="btn-primary">
                     <span class="btn-text">Verify & Generate</span>
                     <span class="loader hidden"></span>
@@ -65,17 +94,22 @@
         </section>
 
         <section id="result-section" class="result-section hidden">
-            <!-- Warning Box -->
+            <div id="verification-checklist" class="verification-checklist hidden">
+                <h3>Verification Progress</h3>
+                <ul id="checklist-items"></ul>
+            </div>
+
             <div id="warning-box" class="warning-box hidden">
                 <h3>Submission Needs Review</h3>
-                <p>This submission needs review: <span id="warning-flags"></span>. Please confirm the details are correct.</p>
+                <p id="warning-flags"></p>
+                <div id="mismatch-metadata" class="mismatch-metadata hidden"></div>
             </div>
 
             <!-- Certificate Card -->
             <div id="certificate-card" class="certificate-card hidden">
-                <div class="certificate-header">
-                    <h2>Certificate of Provenance</h2>
-                    <div id="eco-badge" class="badge"></div>
+                <div class="cert-header">
+                    <h3>Provenance Certificate</h3>
+                    <span id="cert-id" class="cert-id"></span>
                 </div>
                 
                 <div class="farmer-verification" id="farmer-verification-box">
@@ -84,32 +118,33 @@
                 </div>
                 
                 <div class="certificate-content">
-                    <div class="text-content">
-                        <div class="cert-english">
-                            <h4>English</h4>
-                            <p id="cert-text-en"></p>
-                        </div>
-                        <div class="cert-malayalam">
-                            <h4>Malayalam</h4>
-                            <p id="cert-text-ml"></p>
-                        </div>
+                    <div class="cert-text-en" id="cert-text-en"></div>
+                    <hr>
+                    <div class="cert-text-ml" id="cert-text-ml"></div>
+                </div>
+                
+                <div class="cert-meta">
+                    <div class="qr-code" id="qrcode"></div>
+                    <div class="photo-preview hidden" id="photo-preview-container">
+                        <h4>Harvest Photo</h4>
+                        <img id="photo-preview-img" src="" alt="Harvest Thumbnail">
+                        <div id="vision-badge" class="vision-badge hidden"></div>
                     </div>
-                    <div class="meta-content">
-                        <div class="qr-code-container" id="qrcode"></div>
-                        <div class="photo-preview hidden" id="photo-preview-container">
-                            <h4>Harvest Photo</h4>
-                            <img id="photo-preview-img" src="" alt="Harvest Thumbnail">
-                            <div id="vision-badge" class="vision-badge hidden"></div>
-                        </div>
-                        <div class="price-estimator">
-                            <h4>Price Estimator</h4>
-                            <p id="price-estimate" class="price-val"></p>
-                            <p class="price-sub">vs ₹1,200/kg average unverified</p>
-                        </div>
+                    <div class="price-estimator">
+                        <h4>Price Estimator</h4>
+                        <div id="eco-badge" class="badge"></div>
                     </div>
                 </div>
-                <div class="certificate-footer">
-                    <p>Verified by Mannu to Market</p>
+
+                <div class="cert-footer">
+                    <div class="seal">
+                        <span class="seal-icon">🌿</span>
+                        <span class="seal-text">Mannu Registry Board</span>
+                    </div>
+                    <div class="signature">
+                        <span class="sig-script">M. Registry</span>
+                        <span class="sig-title">Authorized Signature</span>
+                    </div>
                 </div>
             </div>
         </section>

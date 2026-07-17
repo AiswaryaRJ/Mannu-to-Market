@@ -1,354 +1,689 @@
+/* ============================================================
+   MANNU TO MARKET — Institutional Design System
+   Agricultural Provenance Certification Authority
+   ============================================================ */
+
+/* ── CSS Variables ─────────────────────────────────────────── */
 :root {
-    --primary-color: #2e7d32;
-    --primary-light: #60ad5e;
-    --primary-dark: #005005;
-    --bg-color: #f4f6f4;
-    --surface-color: #ffffff;
-    --text-main: #2c3e2d;
-    --text-muted: #5e705f;
-    --border-color: #d1d8d1;
-    --warning-bg: #fff3e0;
-    --warning-text: #e65100;
-    --warning-border: #ffcc80;
-    --badge-high: #4caf50;
-    --badge-medium: #ff9800;
+    /* Palette */
+    --clr-primary:      #1B4332;   /* Deep forest green */
+    --clr-primary-dk:   #122B22;   /* Darkened for hover */
+    --clr-primary-lt:   #2D6A4F;   /* Lighter green for accents */
+    --clr-gold:         #B08D57;   /* Warm bronze/gold */
+    --clr-gold-lt:      #C8A96E;
+    --clr-bg:           #FAF7F0;   /* Cream off-white */
+    --clr-surface:      #FFFFFF;
+    --clr-surface-warm: #FDF9F3;   /* Warmer card background */
+    --clr-text:         #2D2A26;   /* Dark charcoal */
+    --clr-text-muted:   #6B6560;
+    --clr-border:       #D4C9B8;   /* Warm gray border */
+    --clr-border-dk:    #B8A99A;
+    --clr-error:        #A64D3E;   /* Muted brick red */
+    --clr-error-bg:     #F9EEEC;
+    --clr-error-border: #D4917F;
+    --clr-success:      #4A7856;   /* Muted sage green */
+    --clr-success-bg:   #EEF4F0;
+    --clr-success-border: #9DBEA9;
+
+    /* Typography */
+    --font-serif:  'Playfair Display', Georgia, 'Times New Roman', serif;
+    --font-sans:   'Inter', system-ui, -apple-system, sans-serif;
+
+    /* Sizing */
+    --radius-sm:   3px;
+    --radius-md:   5px;
+    --radius-lg:   6px;
+    --shadow-card: 0 1px 4px rgba(43, 34, 22, 0.08);
+    --shadow-lift: 0 2px 8px rgba(43, 34, 22, 0.12);
+
+    /* Legacy aliases (used in JS-driven classes) */
+    --primary-color:    var(--clr-primary);
+    --primary-light:    var(--clr-primary-lt);
+    --primary-dark:     var(--clr-primary-dk);
+    --bg-color:         var(--clr-bg);
+    --surface-color:    var(--clr-surface);
+    --text-main:        var(--clr-text);
+    --text-color:       var(--clr-text);
+    --text-muted:       var(--clr-text-muted);
+    --border-color:     var(--clr-border);
+    --warning-bg:       var(--clr-error-bg);
+    --warning-text:     var(--clr-error);
+    --warning-border:   var(--clr-error-border);
+    --badge-high:       var(--clr-success);
+    --badge-medium:     var(--clr-gold);
+    --success-color:    var(--clr-success);
+    --warning-color:    var(--clr-error);
+    --card-shadow:      var(--shadow-card);
 }
 
-* {
+/* ── Reset & Base ───────────────────────────────────────────── */
+*, *::before, *::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
 }
 
 body {
-    font-family: 'Inter', sans-serif;
-    background-color: var(--bg-color);
-    color: var(--text-main);
-    line-height: 1.6;
+    font-family: var(--font-sans);
+    background-color: var(--clr-bg);
+    color: var(--clr-text);
+    line-height: 1.65;
+    font-size: 15px;
 }
 
+/* ── Layout ─────────────────────────────────────────────────── */
 .container {
-    max-width: 800px;
+    max-width: 760px;
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 0 24px;
 }
 
+/* ── Header ─────────────────────────────────────────────────── */
 .header {
-    background-color: var(--primary-color);
-    color: white;
-    padding: 2rem 0;
+    background-color: var(--clr-primary);
+    color: #FFFFFF;
+    padding: 2rem 0 1.75rem;
     text-align: center;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    border-bottom: 4px solid var(--clr-gold);
 }
 
 .header h1 {
-    font-size: 2.5rem;
+    font-family: var(--font-serif);
+    font-size: 2.1rem;
     font-weight: 700;
-    margin-bottom: 0.5rem;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.3rem;
 }
 
 .header p {
-    font-size: 1.1rem;
-    opacity: 0.9;
+    font-size: 0.88rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    opacity: 0.82;
 }
 
+/* ── Main ───────────────────────────────────────────────────── */
 main {
-    padding: 2rem 0;
+    padding: 2.5rem 0 3rem;
 }
 
+/* ── Form Section ───────────────────────────────────────────── */
 .form-section {
-    background: var(--surface-color);
-    padding: 2rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    background: var(--clr-surface-warm);
+    border: 1px solid var(--clr-border);
+    border-radius: var(--radius-lg);
+    padding: 2rem 2rem;
     margin-bottom: 2rem;
+    box-shadow: var(--shadow-card);
 }
 
 .form-section h2 {
-    margin-bottom: 1.5rem;
-    color: var(--primary-dark);
+    font-family: var(--font-serif);
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--clr-primary);
+    margin-bottom: 1.6rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--clr-border);
 }
 
+/* ── Form Elements ──────────────────────────────────────────── */
 .form-group {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.4rem;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.4rem;
+    font-size: 0.72rem;
     font-weight: 600;
-    color: var(--text-main);
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--clr-text-muted);
 }
 
 .form-group input,
 .form-group select {
     width: 100%;
-    padding: 0.75rem;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    font-size: 1rem;
-    font-family: inherit;
-    transition: border-color 0.3s;
+    padding: 0.65rem 0.85rem;
+    border: 1px solid var(--clr-border);
+    border-radius: var(--radius-sm);
+    font-size: 0.95rem;
+    font-family: var(--font-sans);
+    color: var(--clr-text);
+    background: var(--clr-surface);
+    transition: border-color 0.2s;
+    appearance: auto;
 }
 
 .form-group input:focus,
 .form-group select:focus {
     outline: none;
-    border-color: var(--primary-color);
+    border-color: var(--clr-primary);
+    box-shadow: 0 0 0 2px rgba(27, 67, 50, 0.10);
 }
 
+/* ── Buttons ────────────────────────────────────────────────── */
 .btn-primary {
-    background-color: var(--primary-color);
-    color: white;
+    background-color: var(--clr-primary);
+    color: #FFFFFF;
     border: none;
-    padding: 1rem 2rem;
-    font-size: 1.1rem;
+    padding: 0.85rem 2rem;
+    font-size: 0.82rem;
     font-weight: 600;
-    border-radius: 6px;
+    font-family: var(--font-sans);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    border-radius: var(--radius-sm);
     cursor: pointer;
     width: 100%;
-    transition: background-color 0.3s;
     display: flex;
     justify-content: center;
     align-items: center;
+    gap: 0.5rem;
+    transition: background-color 0.2s;
 }
 
 .btn-primary:hover {
-    background-color: var(--primary-dark);
+    background-color: var(--clr-primary-dk);
 }
 
 .btn-primary:disabled {
-    background-color: var(--text-muted);
+    background-color: var(--clr-text-muted);
     cursor: not-allowed;
 }
 
+/* ── Loader ─────────────────────────────────────────────────── */
 .hidden {
     display: none !important;
 }
 
-/* Loader */
 .loader {
-    width: 20px;
-    height: 20px;
-    border: 3px solid rgba(255,255,255,0.3);
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
     border-radius: 50%;
     border-top-color: white;
-    animation: spin 1s ease-in-out infinite;
-    margin-left: 10px;
+    animation: spin 0.8s linear infinite;
 }
 
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
 
-/* Warning Box */
+/* ── Result Section ─────────────────────────────────────────── */
+.result-section {
+    margin-top: 0;
+}
+
+/* ── Verification Checklist ─────────────────────────────────── */
+.verification-checklist {
+    background: var(--clr-surface-warm);
+    border: 1px solid var(--clr-border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem 2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-card);
+}
+
+.verification-checklist h3 {
+    font-family: var(--font-serif);
+    font-size: 1.05rem;
+    color: var(--clr-primary);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--clr-border);
+    letter-spacing: 0.3px;
+}
+
+#checklist-items {
+    list-style: none;
+    padding: 0;
+}
+
+.checklist-item {
+    padding: 0.35rem 0;
+    font-size: 0.92rem;
+    line-height: 1.6;
+    opacity: 0;
+    transform: translateY(8px);
+    animation: slideUpFade 0.35s ease forwards;
+}
+
+@keyframes slideUpFade {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.check-pass { color: var(--clr-success); }
+.check-fail { color: var(--clr-error); font-weight: 600; }
+
+/* ── Warning / Error Box ────────────────────────────────────── */
 .warning-box {
-    background-color: var(--warning-bg);
-    border: 1px solid var(--warning-border);
-    padding: 1.5rem;
-    border-radius: 8px;
-    margin-top: 1.5rem;
+    background-color: var(--clr-error-bg);
+    border: 1px solid var(--clr-error-border);
+    border-left: 4px solid var(--clr-error);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
 }
 
 .warning-box h3 {
-    color: var(--warning-text);
-    margin-bottom: 0.5rem;
+    font-family: var(--font-serif);
+    font-size: 1rem;
+    color: var(--clr-error);
+    margin-bottom: 0.4rem;
 }
 
 .warning-box p {
-    color: var(--warning-text);
+    color: var(--clr-error);
+    font-size: 0.92rem;
 }
 
-/* Certificate Card */
+/* ── Mismatch Metadata Box ──────────────────────────────────── */
+.mismatch-metadata {
+    margin-top: 1rem;
+    background: #FFF5F4;
+    padding: 0.9rem 1rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--clr-error-border);
+}
+
+.mismatch-item {
+    margin-bottom: 0.45rem;
+    font-size: 0.88rem;
+    line-height: 1.5;
+}
+
+.mismatch-item span {
+    display: inline-block;
+}
+
+.mismatch-item .field-name {
+    font-weight: 600;
+    min-width: 110px;
+    color: var(--clr-text);
+    text-transform: capitalize;
+}
+
+.mismatch-item .submitted-val {
+    color: var(--clr-error);
+    font-weight: 600;
+    text-decoration: line-through;
+    margin-right: 0.5rem;
+}
+
+.mismatch-item .expected-val {
+    color: var(--clr-success);
+    font-weight: 600;
+}
+
+/* ── Certificate Card ───────────────────────────────────────── */
 .certificate-card {
-    background: var(--surface-color);
-    border: 2px solid var(--primary-light);
-    border-radius: 12px;
-    padding: 2.5rem;
-    box-shadow: 0 10px 30px rgba(46, 125, 50, 0.1);
+    background: var(--clr-surface-warm);
+    /* Double-border effect */
+    border: 6px solid var(--clr-gold);
+    outline: 1px solid var(--clr-border-dk);
+    border-radius: var(--radius-md);
+    padding: 2.5rem 2.5rem 2rem;
+    box-shadow: var(--shadow-lift);
     position: relative;
-    overflow: hidden;
 }
 
+/* Inner double-border inset */
 .certificate-card::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 8px;
-    background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
+    inset: 6px;
+    border: 1px solid var(--clr-gold-lt);
+    border-radius: 2px;
+    pointer-events: none;
 }
 
-.certificate-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 1rem;
+/* ── Certificate Header ─────────────────────────────────────── */
+.cert-header {
+    text-align: center;
+    margin-bottom: 1.75rem;
+    position: relative;
 }
 
-.certificate-header h2 {
-    color: var(--primary-dark);
-    font-family: serif;
-    font-size: 2rem;
+.cert-header h3 {
+    font-family: var(--font-serif);
+    font-size: 1.65rem;
+    font-weight: 700;
+    color: var(--clr-primary);
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
 }
 
-.badge {
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    font-weight: 600;
-    font-size: 0.9rem;
-    color: white;
+.cert-id {
+    display: inline-block;
+    font-family: 'Courier New', monospace;
+    font-size: 0.78rem;
+    color: var(--clr-text-muted);
+    background: #F0EBE1;
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--clr-border);
+    letter-spacing: 0.5px;
 }
 
-.badge.high {
-    background-color: var(--badge-high);
+/* Letterhead divider */
+.cert-header::after {
+    content: '';
+    display: block;
+    margin: 1rem auto 0;
+    width: 80%;
+    height: 0;
+    border-top: 2px solid var(--clr-gold);
+    border-bottom: 1px solid var(--clr-gold-lt);
 }
 
-.badge.medium {
-    background-color: var(--badge-medium);
-}
-
+/* ── Farmer Verification Banner ─────────────────────────────── */
 .farmer-verification {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    background-color: #e8f5e9;
-    color: var(--primary-dark);
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
-    margin-bottom: 2rem;
+    background-color: var(--clr-success-bg);
+    color: var(--clr-primary);
+    padding: 0.65rem 1rem;
+    border-radius: var(--radius-sm);
+    margin-bottom: 1.75rem;
+    font-size: 0.88rem;
     font-weight: 500;
-    border: 1px solid #c8e6c9;
+    border: 1px solid var(--clr-success-border);
 }
 
 .verification-icon {
-    font-size: 1.1rem;
+    font-size: 1rem;
+    flex-shrink: 0;
 }
 
+/* ── Certificate Content (text body) ────────────────────────── */
 .certificate-content {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 2rem;
-    margin-bottom: 2rem;
+    margin-bottom: 0;
 }
 
-.text-content h4 {
-    color: var(--text-muted);
-    text-transform: uppercase;
-    font-size: 0.85rem;
-    letter-spacing: 1px;
-    margin-bottom: 0.5rem;
+.cert-text-en {
+    font-size: 0.97rem;
+    line-height: 1.75;
+    color: var(--clr-text);
+    margin-bottom: 1rem;
 }
 
-.cert-english {
-    margin-bottom: 1.5rem;
+.certificate-content hr {
+    border: none;
+    border-top: 1px dashed var(--clr-border);
+    margin: 1rem 0;
 }
 
-.cert-english p, .cert-malayalam p {
-    font-size: 1.1rem;
-    line-height: 1.7;
+.cert-text-ml {
+    font-size: 0.97rem;
+    line-height: 1.85;
+    color: var(--clr-text-muted);
 }
 
-.meta-content {
+/* ── Certificate Meta Row ───────────────────────────────────── */
+.cert-meta {
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
+    justify-content: space-around;
     gap: 1.5rem;
-    padding-left: 2rem;
-    border-left: 1px dashed var(--border-color);
+    padding: 1.5rem 0 1rem;
+    margin-top: 1.5rem;
+    border-top: 1px solid var(--clr-border);
+    border-bottom: 1px solid var(--clr-border);
 }
 
-.qr-code-container {
-    padding: 10px;
+/* ── QR Code ─────────────────────────────────────────────────── */
+.qr-code {
+    padding: 8px;
     background: white;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border: 1px solid var(--clr-border);
+    border-radius: var(--radius-sm);
+    display: inline-block;
 }
 
+/* ── Photo Preview ──────────────────────────────────────────── */
 .photo-preview {
     text-align: center;
-    width: 100%;
 }
 
 .photo-preview h4 {
-    color: var(--text-muted);
-    font-size: 0.85rem;
-    margin-bottom: 0.5rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 1px;
     text-transform: uppercase;
+    color: var(--clr-text-muted);
+    margin-bottom: 0.5rem;
 }
 
 .photo-preview img {
-    max-width: 120px;
-    max-height: 120px;
+    max-width: 110px;
+    max-height: 110px;
     object-fit: cover;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    margin-bottom: 0.5rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--clr-border);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 0.4rem;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
 }
 
+/* ── Vision Badge ───────────────────────────────────────────── */
 .vision-badge {
     font-size: 0.75rem;
-    padding: 0.4rem 0.5rem;
-    border-radius: 4px;
+    padding: 0.35rem 0.55rem;
+    border-radius: var(--radius-sm);
     font-weight: 600;
-    margin-top: 0.25rem;
+    margin-top: 0.3rem;
+    text-align: center;
 }
 
 .vision-badge.success {
-    background-color: #e8f5e9;
-    color: #2e7d32;
-    border: 1px solid #c8e6c9;
+    background-color: var(--clr-success-bg);
+    color: var(--clr-success);
+    border: 1px solid var(--clr-success-border);
 }
 
 .vision-badge.warning {
-    background-color: #fff3e0;
-    color: #e65100;
-    border: 1px solid #ffcc80;
+    background-color: var(--clr-error-bg);
+    color: var(--clr-error);
+    border: 1px solid var(--clr-error-border);
 }
 
+/* ── Price / Sustainability Badge ───────────────────────────── */
 .price-estimator {
     text-align: center;
 }
 
 .price-estimator h4 {
-    color: var(--text-muted);
-    font-size: 0.85rem;
-    margin-bottom: 0.5rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 1px;
     text-transform: uppercase;
+    color: var(--clr-text-muted);
+    margin-bottom: 0.5rem;
 }
 
-.price-val {
-    font-size: 1.2rem;
+.badge {
+    display: inline-block;
+    padding: 0.4rem 0.9rem;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 0.82rem;
+    letter-spacing: 0.5px;
+    color: white;
+}
+
+.badge.high {
+    background-color: var(--clr-success);
+}
+
+.badge.medium {
+    background-color: var(--clr-gold);
+}
+
+/* ── Certificate Footer ─────────────────────────────────────── */
+.cert-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 1.75rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--clr-border);
+}
+
+/* Seal */
+.seal {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.seal-icon {
+    /* Circular gold seal */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, var(--clr-gold-lt), var(--clr-gold));
+    border: 3px solid var(--clr-gold-lt);
+    font-size: 1.6rem;
+    box-shadow: 0 1px 4px rgba(176, 141, 87, 0.4), inset 0 1px 2px rgba(255,255,255,0.3);
+}
+
+.seal-text {
+    font-size: 0.62rem;
+    text-transform: uppercase;
     font-weight: 700;
-    color: var(--primary-color);
-}
-
-.price-sub {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-}
-
-.certificate-footer {
+    letter-spacing: 1.2px;
+    color: var(--clr-gold);
     text-align: center;
-    border-top: 1px solid var(--border-color);
-    padding-top: 1.5rem;
-    color: var(--text-muted);
-    font-style: italic;
+    max-width: 80px;
 }
 
+/* Signature */
+.signature {
+    text-align: right;
+}
+
+.sig-script {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 1.55rem;
+    display: block;
+    color: var(--clr-primary);
+    border-bottom: 1px solid var(--clr-text);
+    padding: 0 0.5rem 0.1rem;
+    margin-bottom: 0.3rem;
+    letter-spacing: 0.5px;
+}
+
+.sig-title {
+    font-size: 0.68rem;
+    color: var(--clr-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* ── GPS Location Capture ───────────────────────────────────── */
+.gps-group .btn-secondary {
+    background: var(--clr-surface);
+    color: var(--clr-primary);
+    border: 1px solid var(--clr-primary);
+    padding: 0.6rem 1.1rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    font-family: var(--font-sans);
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.gps-group .btn-secondary:hover {
+    background: var(--clr-primary);
+    color: #fff;
+}
+
+.gps-group .btn-secondary:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.gps-display {
+    display: inline-block;
+    margin-top: 0.55rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--clr-primary);
+    background: var(--clr-success-bg);
+    border: 1px solid var(--clr-success-border);
+    padding: 0.4rem 0.8rem;
+    border-radius: var(--radius-sm);
+}
+
+.gps-display.gps-captured {
+    animation: slideUpFade 0.35s ease forwards;
+}
+
+.gps-manual {
+    margin-top: 0.75rem;
+}
+
+.gps-manual-hint {
+    font-size: 0.82rem;
+    color: var(--clr-text-muted);
+    margin-bottom: 0.4rem;
+}
+
+.gps-manual-inputs {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.gps-manual-inputs input {
+    flex: 1;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid var(--clr-border);
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    font-family: var(--font-sans);
+    color: var(--clr-text);
+    background: var(--clr-surface);
+}
+
+/* ── Responsive ─────────────────────────────────────────────── */
 @media (max-width: 600px) {
-    .certificate-content {
-        grid-template-columns: 1fr;
+    .header h1 { font-size: 1.6rem; }
+    .form-section { padding: 1.25rem 1.25rem; }
+    .certificate-card { padding: 1.75rem 1.25rem 1.5rem; }
+
+    .cert-meta {
+        flex-direction: column;
+        align-items: center;
+        gap: 1.25rem;
     }
-    
-    .meta-content {
-        border-left: none;
-        border-top: 1px dashed var(--border-color);
-        padding-left: 0;
-        padding-top: 2rem;
+
+    .cert-footer {
+        flex-direction: column;
+        align-items: center;
+        gap: 1.25rem;
+    }
+
+    .signature {
+        text-align: center;
+    }
+
+    .gps-manual-inputs {
+        flex-direction: column;
     }
 }

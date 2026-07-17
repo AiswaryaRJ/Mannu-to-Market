@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mannu to Market | Spice Provenance</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <h1>Mannu to Market</h1>
+            <p>Spice Provenance Certificate Generator</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="form-section">
+            <h2>Generate Certificate</h2>
+            <form id="provenance-form">
+                <div class="form-group">
+                    <label for="crop">Crop</label>
+                    <select id="crop" name="crop" required>
+                        <option value="" disabled selected>Select crop...</option>
+                        <option value="Wayanad Pepper">Wayanad Pepper</option>
+                        <option value="Idukki Cardamom">Idukki Cardamom</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="region">Region</label>
+                    <input type="text" id="region" name="region" placeholder="e.g. Wayanad" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="date">Harvest Date</label>
+                    <input type="date" id="date" name="date" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="method">Cultivation Method</label>
+                    <select id="method" name="method" required>
+                        <option value="" disabled selected>Select method...</option>
+                        <option value="Shade-grown/Traditional">Shade-grown/Traditional</option>
+                        <option value="Intensive/Modern">Intensive/Modern</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="photo">Harvest Photo (taken at registration)</label>
+                    <input type="file" id="photo" name="photo" accept="image/*" capture="environment">
+                </div>
+
+                <button type="submit" id="submit-btn" class="btn-primary">
+                    <span class="btn-text">Verify & Generate</span>
+                    <span class="loader hidden"></span>
+                </button>
+            </form>
+        </section>
+
+        <section id="result-section" class="result-section hidden">
+            <!-- Warning Box -->
+            <div id="warning-box" class="warning-box hidden">
+                <h3>Submission Needs Review</h3>
+                <p>This submission needs review: <span id="warning-flags"></span>. Please confirm the details are correct.</p>
+            </div>
+
+            <!-- Certificate Card -->
+            <div id="certificate-card" class="certificate-card hidden">
+                <div class="certificate-header">
+                    <h2>Certificate of Provenance</h2>
+                    <div id="eco-badge" class="badge"></div>
+                </div>
+                
+                <div class="farmer-verification">
+                    <span class="verification-icon">✔️</span>
+                    <span>Farmer ID: KL-IDK-0472 — Verified at Onboarding</span>
+                </div>
+                
+                <div class="certificate-content">
+                    <div class="text-content">
+                        <div class="cert-english">
+                            <h4>English</h4>
+                            <p id="cert-text-en"></p>
+                        </div>
+                        <div class="cert-malayalam">
+                            <h4>Malayalam</h4>
+                            <p id="cert-text-ml"></p>
+                        </div>
+                    </div>
+                    <div class="meta-content">
+                        <div class="qr-code-container" id="qrcode"></div>
+                        <div class="photo-preview hidden" id="photo-preview-container">
+                            <h4>Harvest Photo</h4>
+                            <img id="photo-preview-img" src="" alt="Harvest Thumbnail">
+                        </div>
+                        <div class="price-estimator">
+                            <h4>Price Estimator</h4>
+                            <p id="price-estimate" class="price-val"></p>
+                            <p class="price-sub">vs ₹1,200/kg average unverified</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="certificate-footer">
+                    <p>Verified by Mannu to Market</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

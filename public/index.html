@@ -98,6 +98,41 @@
                     </div>
                 </div>
 
+                <!-- Farmer Voice Confirmation Section -->
+                <div class="form-group" style="background: #F4F7F4; padding: 1.5rem; border-radius: 8px; border: 1px solid var(--clr-primary-light); margin-bottom: 2rem;">
+                    <h3 style="font-size: 1.1rem; color: var(--clr-primary-dark); margin-bottom: 1rem; border-bottom: 1px solid var(--clr-primary-light); padding-bottom: 0.5rem; text-transform: none; font-weight: 600;">🎤 കർഷക ശബ്ദ സ്ഥിരീകരണം (Farmer Voice Confirmation)</h3>
+                    
+                    <p style="font-size: 0.95rem; margin-bottom: 0.8rem; font-weight: 500; color: #333;">ദയവായി ഈ വാക്യം പറയുക:</p>
+                    
+                    <div style="background: #fff; padding: 1rem; border-radius: 6px; font-size: 1.05rem; color: var(--clr-primary-dark); font-weight: 600; line-height: 1.5; margin-bottom: 1rem; border-left: 4px solid var(--clr-primary); box-shadow: 0 1px 3px rgba(0,0,0,0.05);" id="voice-prompt-text">
+                        "ഞാൻ കർഷകനാണ്. ഞാൻ ഇന്ന് <span id="voice-crop-name">[വിളയുടെ പേര്]</span> <span id="voice-region-name">[പ്രദേശം]</span> നിന്നാണ് വിൽക്കുന്നത്."
+                    </div>
+
+                    <button type="button" id="play-sample-btn" class="btn-secondary" style="margin-bottom: 1.5rem; font-size: 0.9rem; padding: 0.6rem 1rem;">
+                        🔊 Play Sample (മാതൃക കേൾക്കുക)
+                    </button>
+
+                    <div class="voice-controls" style="display: flex; gap: 1rem; align-items: center;">
+                        <button type="button" id="record-voice-btn" class="btn-primary" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-size: 1.1rem; padding: 0.8rem;">
+                            🎤 Record (പറയുക)
+                        </button>
+                        <button type="button" id="stop-voice-btn" class="btn-secondary hidden" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-size: 1.1rem; padding: 0.8rem; background: #FFF5F4; border-color: var(--clr-error); color: var(--clr-error);">
+                            ⏹️ Stop (നിർത്തുക)
+                        </button>
+                    </div>
+
+                    <div id="voice-status" style="margin-top: 1rem; font-size: 0.95rem; font-weight: 500; color: var(--clr-primary); min-height: 1.5rem;"></div>
+
+                    <div id="voice-transcript-container" class="hidden" style="margin-top: 1rem; background: #fff; padding: 1rem; border-radius: 6px; border: 1px solid #ddd;">
+                        <p style="font-size: 0.85rem; color: #666; margin-bottom: 0.3rem;">📝 നിങ്ങൾ പറഞ്ഞത് (Transcript):</p>
+                        <p id="voice-transcript-text" style="font-size: 1rem; font-weight: 500; color: #333;"></p>
+                    </div>
+                    
+                    <div id="voice-warning" class="hidden" style="margin-top: 0.8rem; font-size: 0.85rem; color: #d97706;">
+                        ⚠️ ശബ്ദ സ്ഥിരീകരണം നൽകിയാൽ കൂടുതൽ വിശ്വാസ്യത ലഭിക്കും (Voice confirmation adds trust)
+                    </div>
+                </div>
+
                 <button type="submit" id="submit-btn" class="btn-primary">
                     <span class="btn-text">Verify & Generate</span>
                     <span class="loader hidden"></span>
@@ -144,6 +179,7 @@
                     </div>
                     <div class="price-estimator">
                         <h4>Price Estimator</h4>
+                        <div id="price-estimate" style="font-weight: 500; color: var(--clr-primary-dark); margin-bottom: 0.5rem;"></div>
                         <div id="eco-badge" class="badge"></div>
                     </div>
                 </div>

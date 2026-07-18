@@ -18,6 +18,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let qrCodeInstance = null;
     let capturedLat = null;
     let capturedLng = null;
+    let voiceText = '';
+    let voiceUsed = false;
 
     // GPS elements
     const captureGpsBtn = document.getElementById('capture-gps-btn');
@@ -168,8 +170,17 @@ document.addEventListener('DOMContentLoaded', () => {
             method: document.getElementById('method').value,
             gpsLat,
             gpsLng,
-            manualEntry
+            manualEntry,
+            voiceText,
+            voiceUsed
         };
+
+        const voiceWarning = document.getElementById('voice-warning');
+        if (!voiceUsed && voiceWarning) {
+            voiceWarning.classList.remove('hidden');
+        } else if (voiceWarning) {
+            voiceWarning.classList.add('hidden');
+        }
 
         const photoInput = document.getElementById('photo');
         const photoPreviewContainer = document.getElementById('photo-preview-container');
@@ -480,5 +491,85 @@ document.addEventListener('DOMContentLoaded', () => {
         submitBtn.disabled = false;
         btnText.textContent = 'Verify & Generate';
         loader.classList.add('hidden');
+    }
+
+    // --- Voice Confirmation Logic ---
+    const cropSelect = document.getElementById('crop');
+    const regionSelect = document.getElementById('region');
+    const voiceCropName = document.getElementById('voice-crop-name');
+    const voiceRegionName = document.getElementById('voice-region-name');
+    
+    function updateVoicePrompt() {
+        if (voiceCropName) voiceCropName.textContent = cropSelect.value ? cropSelect.options[cropSelect.selectedIndex].text : '[വിളയുടെ പേര്]';
+        if (voiceRegionName) voiceRegionName.textContent = regionSelect.value ? regionSelect.options[regionSelect.selectedIndex].text : '[പ്രദേശം]';
+    }
+    
+    if (cropSelect) cropSelect.addEventListener('change', updateVoicePrompt);
+    if (regionSelect) regionSelect.addEventListener('change', updateVoicePrompt);
+
+    const playSampleBtn = document.getElementById('play-sample-btn');
+    if (playSampleBtn) {
+        playSampleBtn.addEventListener('click', () => {
+            const cropText = cropSelect.value ? cropSelect.options[cropSelect.selectedIndex].text : 'വിളയുടെ പേര്';
+            const regionText = regionSelect.value ? regionSelect.options[regionSelect.selectedIndex].text : 'പ്രദേശം';
+            const utterance = new SpeechSynthesisUtterance(`ഞാൻ കർഷകനാണ്. ഞാൻ ഇന്ന് ${cropText} ${regionText} നിന്നാണ് വിൽക്കുന്നത്.`);
+            utterance.lang = 'ml-IN';
+            window.speechSynthesis.speak(utterance);
+        });
+    }
+
+    const recordVoiceBtn = document.getElementById('record-voice-btn');
+    const stopVoiceBtn = document.getElementById('stop-voice-btn');
+    const voiceStatus = document.getElementById('voice-status');
+    const voiceTranscriptContainer = document.getElementById('voice-transcript-container');
+    const voiceTranscriptText = document.getElementById('voice-transcript-text');
+
+    let recognition = null;
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+        recognition.lang = 'ml-IN';
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        recognition.onstart = () => {
+            voiceStatus.textContent = 'കേൾക്കുന്നു... (Listening)';
+            recordVoiceBtn.classList.add('hidden');
+            stopVoiceBtn.classList.remove('hidden');
+        };
+
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            voiceText = transcript;
+            voiceUsed = true;
+            voiceTranscriptText.textContent = transcript;
+            voiceTranscriptContainer.classList.remove('hidden');
+            voiceStatus.textContent = 'റെക്കോർഡ് പൂർത്തിയായി (Recording complete)';
+        };
+
+        recognition.onerror = (event) => {
+            voiceStatus.textContent = 'ശബ്ദം തിരിച്ചറിയാൻ കഴിഞ്ഞില്ല (Error recognizing voice)';
+            recordVoiceBtn.classList.remove('hidden');
+            stopVoiceBtn.classList.add('hidden');
+        };
+
+        recognition.onend = () => {
+            recordVoiceBtn.classList.remove('hidden');
+            stopVoiceBtn.classList.add('hidden');
+        };
+
+        if (recordVoiceBtn) {
+            recordVoiceBtn.addEventListener('click', () => {
+                recognition.start();
+            });
+        }
+        if (stopVoiceBtn) {
+            stopVoiceBtn.addEventListener('click', () => {
+                recognition.stop();
+            });
+        }
+    } else {
+        if (voiceStatus) voiceStatus.textContent = 'നിങ്ങളുടെ ബ്രൗസറിൽ ശബ്ദ റെക്കോർഡിംഗ് ലഭ്യമല്ല (Speech recognition not supported in this browser).';
+        if (recordVoiceBtn) recordVoiceBtn.disabled = true;
     }
 });
